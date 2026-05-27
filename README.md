@@ -8,7 +8,9 @@ Containing several independent projects.
 ### MachineLearning
     Based on work by Tsoding (adapted from recorded streams)
     *see license* at MachineLearning/nn/LICENSE
+    Modifications have been made.
 
 ### Olivec
     Based on work by Tsoding (adapted from recorded streams)
     *see license* at Olivec/LICENSE
+    Modifications have been made.
