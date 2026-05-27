@@ -3,12 +3,12 @@ My C language learning projects
 
 Containing several independent projects.
 
-##Projects
+## Projects
 
-###MachineLearning
+### MachineLearning
     Based on work by Tsoding (adapted from recorded streams)
     *see license* at MachineLearning/nn/LICENSE
 
-###Olivec
+### Olivec
     Based on work by Tsoding (adapted from recorded streams)
     *see license* at Olivec/LICENSE
