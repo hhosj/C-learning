@@ -61,4 +61,27 @@ void olivec_fill_rect(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
   }
 }
 
+void olivec_fill_circle(uint32_t *pixels, size_t pixels_width, size_t pixels_height,
+                        int cx, int cy, size_t r,
+                        uint32_t color) // this function creates a circle, centered (cx, cy), radius r.
+{
+  int x1 = cx - (int)r;
+  int y1 = cy - (int)r;
+  int x2 = cx + (int)r;
+  int y2 = cy + (int)r;
+  for (int y = y1; y <= y2; ++y) {
+    if (0 <= y && y < (int)pixels_height) {
+      for (int x = x1; x <= x2; ++x) {
+        if (0 <= x && x < (int)pixels_width) {
+          int dx = x - cx;
+          int dy = y - cy;
+          if (dx*dx + dy*dy <= r*r) {
+            pixels[y*pixels_width + x] = color;
+          }
+        }
+      }
+    }
+  }
+}
+
 #endif //OLIVE_C_
