@@ -37,13 +37,16 @@ void olivec_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
 
   if (dx != 0) {
     int c = y1 - dy * x1 / dx;
-
     if (x1 > x2) swap_int(&x1, &x2);
     for (int x = x1; x <= x2; ++x) {
       if (0 <= x && x < (int)pixels_width) {
-        int y = dy * x / dx + c;
-        if (0 <= y && y < (int)pixels_height) {
-          pixels[y * pixels_width + x] = color;
+        int sy1 = dy * x / dx + c;  // sy1 and sy2 are to fill the gap when slope is steep
+        int sy2 = dy * (x + 1) / dx + c;
+        if (sy1 > sy2) swap_int(&sy1, &sy2);
+        for (int y = sy1; y <= sy2; ++y){
+          if (0 <= y && y < (int)pixels_height) {
+            pixels[y * pixels_width + x] = color;
+          }
         }
       }
     }
@@ -119,7 +122,7 @@ bool lines_example(void)
 {
   olivec_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
 
-  olivec_draw_line(pixels, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, FOREGROUND_COLOR);
+  olivec_draw_line(pixels, WIDTH, HEIGHT, WIDTH/2, 0, WIDTH/2, HEIGHT, FOREGROUND_COLOR);
   
   const char *file_path = "lines_example.ppm";
   Errno err = olivec_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
