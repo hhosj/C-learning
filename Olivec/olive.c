@@ -9,9 +9,9 @@
 #include <errno.h>
 
 // WHAT are THESE??
-//#define OLIVEC_SWAP(T, a, b) do {T t = a; a = b; b = t;}while(0)
-//#define OLIVEC_SIGN(T, x) ((T)((x) > 0) - (T)((x) < 0))
-//#define OLIVEC_ABS(T, x) (OLIVEC_SIGN(T, x)*(x))
+#define OLIVEC_SWAP(T, a, b) do {T t = a; a = b; b = t;}while(0)// swap variable a and b, type of 'TYPE'.
+#define OLIVEC_SIGN(T, x) ((T)((x) > 0) - (T)((x) < 0))// x > 1, equals to 1;x < 1, equals to -1. 
+#define OLIVEC_ABS(T, x) (OLIVEC_SIGN(T, x)*(x))// ABS function
 
 void olivec_fill(uint32_t *pixels, size_t width, size_t height, uint32_t color)
 { 
@@ -54,14 +54,18 @@ Errno olivec_save_to_ppm_file(uint32_t *pixels,size_t width, size_t height, cons
 }
 
 void olivec_fill_rect(uint32_t *pixels, size_t pixels_width, size_t pixels_height,
-                      int x0, int y0, size_t w, size_t h,
+                      int x0, int y0, int w, int h,
                       uint32_t color)// pixels_width and height refers to the size of the canvas, and w\h refer to                                        the size of the rect that is to be printed; 
 {
-  for (int dy = 0; dy < (int)h; ++dy) {
-    int y = y0 + dy;
-    if (0 <= y && y < (int)pixels_height) {
-      for (int dx = 0; dx < (int)w; ++dx) {
-        int x = x0 + dx;
+  int x2 = x1 + OLIVEC_SIGN(int, w)*(OLIVEC_ABS(int, w) - 1);// x2 = x1 + (w - 1)when w > 0 or (w + 1)when w < 0.
+  if (x1 > x2) OLIVEC_SWAP(int, x1, x2);
+  int y2 = y1 + OLIVEC_SIGN(int, h)*(OLIVEC_ABS(int, h) - 1);
+  if (y1 > y2) OLIVEC_SWAP(int, y1, y2);
+  
+  for (int y = y1; y <= y2; ++y) {
+    // TODO: move boundary checks out of the loops.
+    if (0 <= y && y < (int) pixles_height) {
+      for (int x = x1; x <= x2; ++x) {
         if (0 <= x && x < (int)pixels_width) {
           pixels[y * pixels_width + x] = color;
         }
@@ -71,9 +75,10 @@ void olivec_fill_rect(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
 }
 
 void olivec_fill_circle(uint32_t *pixels, size_t pixels_width, size_t pixels_height,
-                        int cx, int cy, size_t r,
+                        int cx, int cy, int r,
                         uint32_t color) // this function creates a circle, centered (cx, cy), radius r.
 {
+  // TOBE CHANGED__________________________________________//
   int x1 = cx - (int)r;
   int y1 = cy - (int)r;
   int x2 = cx + (int)r;
@@ -136,12 +141,18 @@ void olivec_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
   }
 }
 
+void sort_triangle_points_by_y(int *x1, int *y1, int *x2, int *y2, int *x3, int*y3)
+{
+  
+}
+
 void olievc_fill_triangle(uint32_t *pixels, size_t width, size_t height,
                           int x1, int y1,
                           int x2, int y2,
                           int x3, int y3,
                           uint32_t color)
 {
+  sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
   
 }
 
