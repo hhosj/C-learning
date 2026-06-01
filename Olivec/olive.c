@@ -54,7 +54,7 @@ Errno olivec_save_to_ppm_file(uint32_t *pixels,size_t width, size_t height, cons
 }
 
 void olivec_fill_rect(uint32_t *pixels, size_t pixels_width, size_t pixels_height,
-                      int x0, int y0, int w, int h,
+                      int x1, int y1, int w, int h,
                       uint32_t color)// pixels_width and height refers to the size of the canvas, and w\h refer to                                        the size of the rect that is to be printed; 
 {
   int x2 = x1 + OLIVEC_SIGN(int, w)*(OLIVEC_ABS(int, w) - 1);// x2 = x1 + (w - 1)when w > 0 or (w + 1)when w < 0.
@@ -64,7 +64,7 @@ void olivec_fill_rect(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
   
   for (int y = y1; y <= y2; ++y) {
     // TODO: move boundary checks out of the loops.
-    if (0 <= y && y < (int) pixles_height) {
+    if (0 <= y && y < (int) pixels_height) {
       for (int x = x1; x <= x2; ++x) {
         if (0 <= x && x < (int)pixels_width) {
           pixels[y * pixels_width + x] = color;
@@ -78,12 +78,18 @@ void olivec_fill_circle(uint32_t *pixels, size_t pixels_width, size_t pixels_hei
                         int cx, int cy, int r,
                         uint32_t color) // this function creates a circle, centered (cx, cy), radius r.
 {
-  // TOBE CHANGED__________________________________________//
-  int x1 = cx - (int)r;
-  int y1 = cy - (int)r;
-  int x2 = cx + (int)r;
-  int y2 = cy + (int)r;
+  if (r == 0) return;
+  
+  int x1 = cx - r;
+  int x2 = cx + r;
+  if (x1 > x2) OLIVEC_SWAP(int, x1, x2);
+
+  int y1 = cy - r;
+  int y2 = cy + r;
+  if (y1 > y2) OLIVEC_SWAP(int, y1, y2);
+  
   for (int y = y1; y <= y2; ++y) {
+    // TODO: move boundary checks out of the loops in olivec_fill_circle
     if (0 <= y && y < (int)pixels_height) {
       for (int x = x1; x <= x2; ++x) {
         if (0 <= x && x < (int)pixels_width) {
@@ -98,29 +104,23 @@ void olivec_fill_circle(uint32_t *pixels, size_t pixels_width, size_t pixels_hei
   }
 }
 
-void swap_int(int *a, int *b) // Swap a and b.
-{
-  int t = *a;
-  *a = *b;
-  *b = t;
-}
-
-
+// TODO: lines with different thicness
 void olivec_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_height,
                       int x1, int y1, int x2, int y2,
                       uint32_t color) // Original version.Could be upgraded with Bresenham?
 {
+  // TODO: fix the olivec_draw_line stairs
   int dx = x2 - x1;
   int dy = y2 - y1;
 
   if (dx != 0) {
     int c = y1 - dy * x1 / dx;
-    if (x1 > x2) swap_int(&x1, &x2);
+    if (x1 > x2) OLIVEC_SWAP(int, x1, x2);
     for (int x = x1; x <= x2; ++x) {
       if (0 <= x && x < (int)pixels_width) {
         int sy1 = dy * x / dx + c;  // sy1 and sy2 are to fill the gap when slope is steep
         int sy2 = dy * (x + 1) / dx + c;
-        if (sy1 > sy2) swap_int(&sy1, &sy2);
+        if (sy1 > sy2) OLIVEC_SWAP(int, sy1, sy2);
         for (int y = sy1; y <= sy2; ++y){
           if (0 <= y && y < (int)pixels_height) {
             pixels[y * pixels_width + x] = color;
@@ -131,7 +131,7 @@ void olivec_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
   } else { // Vertical line.
     int x = x1;
     if (0 <= x && x < (int)pixels_width) {
-      if (y1 > y2) swap_int(&y1, &y2);
+      if (y1 > y2) OLIVEC_SWAP(int, y1, y2);
       for (int y = y1; y < y2; ++y) {
         if (0 <= y && y < (int)pixels_height) {
           pixels[y * pixels_width + x] = color;
@@ -141,9 +141,24 @@ void olivec_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
   }
 }
 
-void sort_triangle_points_by_y(int *x1, int *y1, int *x2, int *y2, int *x3, int*y3)
+void sort_triangle_points_by_y(int *x1, int *y1,
+                               int *x2, int *y2,
+                               int *x3, int *y3)
 {
-  
+  if (*y1 > *y2) {
+    OLIVEC_SWAP(int, *x1, *x2);
+    OLIVEC_SWAP(int, *y1, *y2);
+  }
+
+  if (*y2 > *y3) {
+    OLIVEC_SWAP(int, *x2, *x3);
+    OLIVEC_SWAP(int, *y2, *y3);
+  }
+
+  if (*y1 > *y2) {
+    OLIVEC_SWAP(int, *x1, *x2);
+    OLIVEC_SWAP(int, *y1, *y2);
+  }
 }
 
 void olievc_fill_triangle(uint32_t *pixels, size_t width, size_t height,

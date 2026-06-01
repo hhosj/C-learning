@@ -94,6 +94,17 @@ bool lines_example(void)
 
 int main(void)
 {
+  int x1 = 69,    y1 = 3;
+  int x2 = 420,   y2 = 1;
+  int x3 = 69420, y3 = 2;
+  sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
+  printf("x1 = %d, y1 = %d\n", x1, y1);
+  printf("x2 = %d, y2 = %d\n", x2, y2);
+  printf("x3 = %d, y3 = %d\n", x3, y3);
+}
+
+int main2(void)
+{
   if (!checkerboard_example()) return -1;
   if (!circle_example()) return -1;
   if (!lines_example()) return -1;
