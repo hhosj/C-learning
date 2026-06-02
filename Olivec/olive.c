@@ -175,6 +175,7 @@ bool olivec_line_of_segment(int x1, int y1, int x2, int y2, int *k, int *c)
   return true;
 }
 
+// This function is slightly different form Tsoding's code.
 void olivec_fill_triangle(uint32_t *pixels, size_t width, size_t height,
                           int x1, int y1,
                           int x2, int y2,
@@ -185,17 +186,29 @@ void olivec_fill_triangle(uint32_t *pixels, size_t width, size_t height,
 
   int dx12 = x2 - x1;
   int dy12 = y2 - y1;
-  int c12 = dx12 != 0 ? y1 - dy12 * x1 / dx12 : 0;
-    
-  int dx13 = x1 - x3;
-  int dy13 = y1 - y3;
-  int c13 = dx13 != 0 ? y1 - dy13 * x1 / dx13 : 0;
-      
+  int dx13 = x3 - x1;
+  int dy13 = y3 - y1;
+  
   for (int y = y1; y <= y2; ++y) {
     if (0 <= y && y < (int)height) {
-      // this part is different from the original code by Tsoding.
-      int s1 = dx12 != 0 ? (dy12 != 0 ? (y - c12) * dx12 / dy12 : x2) : x1; // ks + c = y, s stands for x, k = dy/dx.
-      int s2 = dx13 != 0 ? (dy12 != 0 ? (y - c13) * dx13 / dy13 : x1) : x1;
+      int s1 = dy12 != 0 ? (y - y2) * dx12 / dy12 + x2 : x1; // ks + c = y, s stands for x, k = dy/dx.
+      int s2 = dy13 != 0 ? (y - y1) * dx13 / dy13 + x1 : x1;
+      if (s1 > s2) OLIVEC_SWAP(int, s1, s2);
+      for (int x = s1; x <= s2; ++x) {
+        if (0 <= x && x < (int)width) {
+          pixels[y * width + x] = color; 
+        }
+      }
+    }
+  }
+
+  int dx23 = x3 - x2;
+  int dy23 = y3 - y2;
+  
+  for (int y = y2; y <= y3; ++y) {
+    if (0 <= y && y < (int)height) {
+      int s1 = dy23 != 0 ? (y - y3) * dx23 / dy23 + x3 : x2; // ks + c = y, s stands for x, k = dy/dx.
+      int s2 = dy13 != 0 ? (y - y1) * dx13 / dy13 + x1 : x1;
       if (s1 > s2) OLIVEC_SWAP(int, s1, s2);
       for (int x = s1; x <= s2; ++x) {
         if (0 <= x && x < (int)width) {
