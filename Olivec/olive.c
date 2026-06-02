@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
+#include <assert.h>
 
 // WHAT are THESE??
 #define OLIVEC_SWAP(T, a, b) do {T t = a; a = b; b = t;}while(0)// swap variable a and b, type of 'TYPE'.
@@ -141,7 +142,7 @@ void olivec_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_heigh
   }
 }
 
-void sort_triangle_points_by_y(int *x1, int *y1,
+void olivec_sort_triangle_points_by_y(int *x1, int *y1,
                                int *x2, int *y2,
                                int *x3, int *y3)
 {
@@ -161,14 +162,53 @@ void sort_triangle_points_by_y(int *x1, int *y1,
   }
 }
 
-void olievc_fill_triangle(uint32_t *pixels, size_t width, size_t height,
+bool olivec_line_of_segment(int x1, int y1, int x2, int y2, int *k, int *c)
+{
+  int dx = x2 - x1;
+  int dy = y2 - y1;
+
+  if (dx ==0) return false;
+
+  *k = dy / dx;
+  *c = y1 - dy * x1 / dx;
+
+  return true;
+}
+
+void olivec_fill_triangle(uint32_t *pixels, size_t width, size_t height,
                           int x1, int y1,
                           int x2, int y2,
                           int x3, int y3,
                           uint32_t color)
 {
-  sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
-  
+  olivec_sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
+
+  if (x1 != x2 && y1 != y2) {
+    int dx12 = x2 - x1;
+    int dy12 = y2 - y1;
+    int c12 = y1 - dy12 * x1 / dx12;
+    
+    if (x2 != x3 && y1 != y2) {
+      int dx23 = x2 - x3;
+      int dy23 = y2 - y3;
+      int c23 = y2 - dy23 * x2 / dx23;
+      
+      for (int y = y1; y <= y2; ++y) {
+        if (0 <= y && y < (int)height) {
+          int s1 = (y - c12) * dx12 / dy12; // ks + c = y, s stands for x, k = dy/dx.
+          int s2 = (y - c23) * dx23 / dy23;
+          if (s1 > s2) OLIVEC_SWAP(int, s1, s2);
+          for (int x = s1; x <= s2; ++x) {
+            if (0 <= x && x < (int)width) {
+              pixels[y * width + x] = color; 
+            }
+          }
+        }
+      }
+    } else {
+      assert(0 && "unreachable");
+    }
+  }
 }
 
 #endif //OLIVE_C_

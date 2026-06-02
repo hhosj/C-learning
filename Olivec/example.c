@@ -92,22 +92,48 @@ bool lines_example(void)
   return true;
 }
 
-int main(void)
+bool triangle_example(void)
+{
+  olivec_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+  int radius = 5;
+  uint32_t color = FOREGROUND_COLOR;
+
+  int x1 = WIDTH/2,   y1 = HEIGHT/8;
+  int x2 = WIDTH/8,   y2 = HEIGHT/2;
+  int x3 = WIDTH*7/8, y3 = HEIGHT*7/8;
+  
+  olivec_fill_circle(pixels, WIDTH, HEIGHT, x1, y1, radius, color);
+  olivec_fill_circle(pixels, WIDTH, HEIGHT, x2, y2, radius, color);
+  olivec_fill_circle(pixels, WIDTH, HEIGHT, x3, y3, radius, color);
+  olivec_fill_triangle(pixels, WIDTH, HEIGHT, x1, y1, x2, y2, x3, y3, color);
+  
+  const char *file_path = "triangle_example.ppm";
+  Errno err = olivec_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+  if (err) {
+    fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+    return false;
+  }
+  
+  return true;
+}
+
+int main2(void)
 {
   int x1 = 69,    y1 = 3;
   int x2 = 420,   y2 = 1;
   int x3 = 69420, y3 = 2;
-  sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
+  olivec_sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
   printf("x1 = %d, y1 = %d\n", x1, y1);
   printf("x2 = %d, y2 = %d\n", x2, y2);
   printf("x3 = %d, y3 = %d\n", x3, y3);
 }
 
-int main2(void)
+int main(void)
 {
   if (!checkerboard_example()) return -1;
   if (!circle_example()) return -1;
   if (!lines_example()) return -1;
+  if (!triangle_example()) return -1;
   
   return 0;
 }
