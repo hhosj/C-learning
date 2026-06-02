@@ -183,30 +183,25 @@ void olivec_fill_triangle(uint32_t *pixels, size_t width, size_t height,
 {
   olivec_sort_triangle_points_by_y(&x1, &y1, &x2, &y2, &x3, &y3);
 
-  if (x1 != x2 && y1 != y2) {
-    int dx12 = x2 - x1;
-    int dy12 = y2 - y1;
-    int c12 = y1 - dy12 * x1 / dx12;
+  int dx12 = x2 - x1;
+  int dy12 = y2 - y1;
+  int c12 = dx12 != 0 ? y1 - dy12 * x1 / dx12 : 0;
     
-    if (x1 != x3 && y1 != y3) {
-      int dx13 = x1 - x3;
-      int dy13 = y1 - y3;
-      int c13 = y1 - dy13 * x1 / dx13;
+  int dx13 = x1 - x3;
+  int dy13 = y1 - y3;
+  int c13 = dx13 != 0 ? y1 - dy13 * x1 / dx13 : 0;
       
-      for (int y = y1; y <= y2; ++y) {
-        if (0 <= y && y < (int)height) {
-          int s1 = (y - c12) * dx12 / dy12; // ks + c = y, s stands for x, k = dy/dx.
-          int s2 = (y - c13) * dx13 / dy13;
-          if (s1 > s2) OLIVEC_SWAP(int, s1, s2);
-          for (int x = s1; x <= s2; ++x) {
-            if (0 <= x && x < (int)width) {
-              pixels[y * width + x] = color; 
-            }
-          }
+  for (int y = y1; y <= y2; ++y) {
+    if (0 <= y && y < (int)height) {
+      // this part is different from the original code by Tsoding.
+      int s1 = dx12 != 0 ? (dy12 != 0 ? (y - c12) * dx12 / dy12 : x2) : x1; // ks + c = y, s stands for x, k = dy/dx.
+      int s2 = dx13 != 0 ? (dy12 != 0 ? (y - c13) * dx13 / dy13 : x1) : x1;
+      if (s1 > s2) OLIVEC_SWAP(int, s1, s2);
+      for (int x = s1; x <= s2; ++x) {
+        if (0 <= x && x < (int)width) {
+          pixels[y * width + x] = color; 
         }
       }
-    } else {
-      assert(0 && "unreachable");
     }
   }
 }
