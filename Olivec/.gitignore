@@ -62,4 +62,5 @@ dkms.conf
 # .ppm files
 *.ppm
 
-
+bin/
+imgs/
