@@ -36,6 +36,29 @@
 
 #define TEST_DIR_PATH "./test"
 
+char hexchar(uint8_t x)
+{
+  if (x < 10) return x + '0';
+  if (x < 16) return x - 10 + 'A';
+  UNREACHABLE("hexchar");
+}
+
+const char *display_hexcolor(uint32_t c)
+{
+  static char buffer[1 + 8 + 1];
+  buffer[0] = '#';
+  buffer[1] = hexchar((c>>(1*4))&0xF);
+  buffer[2] = hexchar((c>>(0*4))&0xF);
+  buffer[3] = hexchar((c>>(3*4))&0xF);
+  buffer[4] = hexchar((c>>(2*4))&0xF);
+  buffer[5] = hexchar((c>>(5*4))&0xF);
+  buffer[6] = hexchar((c>>(4*4))&0xF);
+  buffer[7] = hexchar((c>>(7*4))&0xF);
+  buffer[8] = hexchar((c>>(6*4))&0xF);
+  buffer[9] = '\0';
+  return buffer;
+}
+
 uint32_t pixels[WIDTH * HEIGHT];
 
 bool record_test_case(const char *file_path)
@@ -59,7 +82,7 @@ bool replay_test_case(const char *program_path, const char *file_path, const cha
     if (expected_pixels == NULL) {
       fprintf(stderr, "%s: TEST FAILURE: could not read the file: %s\n", file_path, strerror(errno));
       if (errno = ENOENT) {
-        fprintf(stderr, "%s: HINT: Consider running '%s record' to create it\n", file_path, program_path);
+        fprintf(stderr, "%s: HINT: Consider running '$ %s record' to create it\n", file_path, program_path);
       }
       return_defer(false);
     }
@@ -86,7 +109,8 @@ bool replay_test_case(const char *program_path, const char *file_path, const cha
       if (!stbi_write_png(failure_file_path, WIDTH, HEIGHT, 4, pixels, sizeof(uint32_t)*WIDTH)) {
         fprintf(stderr, "ERROR: could not generate image diff %s: %s\n", failure_file_path, strerror(errno));
       } else {
-        printf("See image diff %s for more info\n", failure_file_path);
+        fprintf(stderr, "%s: HINT: See image diff %s for more info. The pixels with color %s are the ones that differ from the expected ones.\n",file_path, failure_file_path, display_hexcolor(ERROR_COLOR));
+        fprintf(stderr, "%s: HINT: If this behaviour is intentional confirm that by updating the image with '$ %s record'\n", file_path, program_path);
       }
       return_defer(false);
     }
@@ -132,13 +156,41 @@ void test_draw_line(void)
 {
   olivec_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
   olivec_draw_line(pixels, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, RED_COLOR);
-  olivec_draw_line(pixels, WIDTH, HEIGHT, WIDTH, 0, 0, HEIGHT, RED_COLOR);
+  olivec_draw_line(pixels, WIDTH, HEIGHT, WIDTH, 0, 0, HEIGHT, BLUE_COLOR);
+  olivec_draw_line(pixels, WIDTH, HEIGHT, WIDTH/2, 0, WIDTH/2, HEIGHT, GREEN_COLOR);
+}
+
+void test_fill_triangle(void)
+{
+  olivec_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+
+  {
+    int x1 = WIDTH/2, y1 = HEIGHT/8;
+    int x2 = WIDTH/8, y2 = HEIGHT/2;
+    int x3 = WIDTH*7/8, y3 = HEIGHT*7/8;
+    olivec_fill_triangle(pixels, WIDTH, HEIGHT, x1, y1, x2, y2, x3, y3, RED_COLOR);
+  }
+
+  {
+    int x1 = WIDTH/2, y1 = HEIGHT*2/8;
+    int x2 = WIDTH*2/8, y2 = HEIGHT/2;
+    int x3 = WIDTH*6/8, y3 = HEIGHT/2;
+    olivec_fill_triangle(pixels, WIDTH, HEIGHT, x1, y1, x2, y2, x3, y3, GREEN_COLOR);
+  }
+
+  {
+    int x1 = WIDTH/8, y1 = HEIGHT/8;
+    int x2 = WIDTH/8, y2 = HEIGHT*3/8;
+    int x3 = WIDTH*3/8, y3 = HEIGHT*3/8;
+    olivec_fill_triangle(pixels, WIDTH, HEIGHT, x1, y1, x2, y2, x3, y3, BLUE_COLOR);
+  }
 }
 
 Test_Case test_cases[] = {
   DEFINE_TEST_CASE(test_fill_rect),
   DEFINE_TEST_CASE(test_fill_circle),
   DEFINE_TEST_CASE(test_draw_line),
+  DEFINE_TEST_CASE(test_fill_triangle),
 };
 #define TEST_CASES_COUNT (sizeof(test_cases)/sizeof(test_cases[0]))
 

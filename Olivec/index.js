@@ -17,7 +17,7 @@ function make_environment(...envs) {
     });
 }
 
-WebAssembly.instantiateStreaming(fetch('./wasm.o'), {
+WebAssembly.instantiateStreaming(fetch('./wasm.wasm'), {
     "env": make_environment()
 }).then(w0 => {
     w = w0;

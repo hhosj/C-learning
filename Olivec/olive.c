@@ -5,6 +5,8 @@
 #define OLIVE_C_
 
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #define OLIVEC_SWAP(T, a, b) do {T t = a; a = b; b = t;}while(0)// swap variable a and b, type of 'TYPE'.
 #define OLIVEC_SIGN(T, x) ((T)((x) > 0) - (T)((x) < 0))// x > 1, equals to 1;x < 1, equals to -1. 
