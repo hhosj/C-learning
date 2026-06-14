@@ -21,5 +21,7 @@ WebAssembly.instantiateStreaming(fetch('./wasm.wasm'), {
     "env": make_environment()
 }).then(w0 => {
     w = w0;
-    console.log(w);
+    const buffer = w.instance.exports.memory.buffer;
+    const pixels = w.instance.exports.render();
+    console.log(new Uint8Array(buffer, pixels, app.width*app.height*4));
 })
