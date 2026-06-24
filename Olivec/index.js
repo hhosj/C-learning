@@ -12,17 +12,35 @@ function make_environment(...envs) {
                     return env[prop];
                 }
             }
-            return (...arge) => {console.error("NOT IMPLEMENTED: "+prop, args)}
+            return (...args) => {console.error("NOT IMPLEMENTED: "+prop, args)}
         }
     });
 }
 
 WebAssembly.instantiateStreaming(fetch('./wasm.wasm'), {
-    "env": make_environment()
+    "env": make_environment({
+        "atan2f": Math.atan2,
+        "cosf": Math.cos,
+        "sinf": Math.sin,
+    })
 }).then(w0 => {
     w = w0;
-    const buffer = w.instance.exports.memory.buffer;
-    const pixels = w.instance.exports.render();
-    const image = new ImageData(new Uint8ClampedArray(buffer, pixels, app.width*app.height*4), app.width); 
-    ctx.putImageData(image, 0, 0);
+
+    let prev = null;
+    function first(timestamp) {
+        prev = timestamp;
+        window.requestAnimationFrame(loop);
+    }
+    function loop(timestamp) {
+        const dt = timestamp - prev;
+        prev = timestamp;
+
+        const buffer = w.instance.exports.memory.buffer;
+        const pixels = w.instance.exports.render(dt*0.001);
+        const image = new ImageData(new Uint8ClampedArray(buffer, pixels, app.width*app.height*4), app.width); 
+        ctx.putImageData(image, 0, 0);
+        
+        window.requestAnimationFrame(loop);
+    }
+    window.requestAnimationFrame(loop);
 })
