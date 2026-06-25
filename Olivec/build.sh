@@ -4,9 +4,9 @@ set -xe
 
 mkdir -p ./bin/
 
-gcc -Wall -Wextra -ggdb -o ./bin/example example.c
-gcc -Wall -Wextra -ggdb -o ./bin/test test.c -lm
-clang -Wall -Wextra --target=wasm32 -o wasm.o -c ./wasm.c
-wasm-ld -m wasm32 --no-entry --export-all --allow-undefined -o wasm.wasm wasm.o
-
-./bin/example
+#gcc -Wall -Wextra -ggdb -o ./bin/example example.c
+gcc -Wall -Wextra -ggdb -o ./bin/test -Ithirdparty test.c -lm
+gcc -Wall -Wextra -ggdb -o ./bin/gallery -Ithirdparty -I. examples/gallery.c
+clang -Os -fno-builtin -Wall -Wextra -Wswitch-enum --target=wasm32 --no-standard-libraries -Wl,--no-entry -Wl,--export-all -Wl,--allow-undefined -o ./bin/triangle.wasm -I. ./examples/triangle.c
+gcc -Wall -Wextra -ggdb -I. -DSDL_PLATFORM -o ./bin/triangle ./examples/triangle.c -lm -lSDL2
+#./bin/example
